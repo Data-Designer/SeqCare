@@ -42,15 +42,15 @@ class CosineClassifier(nn.Module):
             edge_index = torch.stack([row, col], dim=0)
 
         cosine_weight = self.cosine_linear.weight
-        x = torch.index_select(cosine_weight, 0, x.squeeze())
+        x = torch.index_select(cosine_weight, 0, x.squeeze()) # 重排feature.
 
         for i, conv in enumerate(self.cooccur_convs):
-            x = F.relu(conv(x, edge_index, edge_weight))
+            x = F.relu(conv(x, edge_index, edge_weight)) 
             x = self.bns[i](x)
 
 
-        weight_norm = F.normalize(x, p=2, dim=1)
-        input_norm = F.normalize(input, p=2, dim=1)
+        weight_norm = F.normalize(x, p=2, dim=1) # Num, D
+        input_norm = F.normalize(input, p=2, dim=1) # B, D
         output = self.temperature * torch.einsum('ik,jk->ij', [input_norm,weight_norm])
         return output
 
